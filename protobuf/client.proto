@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package gonetlock;
+option go_package = "github.com/gonetlock/gonetlock/gonetlockprotobuf";
+
+message ClientAttachRequest {
+  string client_id = 1;
+}
+
+message ClientAttachResponse {
+  string client_id = 1;
+}
+
+message ClientDetachRequest {
+  string client_id = 1;
+}
+
+message ClientDetachResponse {
+  string client_id = 1;
+}
+
+message ClientCreateRequest {
+}
+
+message ClientCreateResponse {
+  string client_id = 2;
+}
+
+message ClientGetDefaultIdRequest {
+}
+
+message ClientGetDefaultIdResponse {
+  string client_id = 1;
+}
+
+message ClientGetAttachedIdsRequest {
+}
+
+message ClientGetAttachedIdsResponse {
+  repeated string client_ids = 1;
+}

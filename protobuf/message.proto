@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package gonetlock;
+option go_package = "github.com/gonetlock/gonetlock/gonetlockprotobuf";
+
+import "google/protobuf/any.proto";
+
+message Message {
+  string message_key = 1; // if a request contains a non-empty key, it will be echoed back in the response
+  google.protobuf.Any message = 2;
+}

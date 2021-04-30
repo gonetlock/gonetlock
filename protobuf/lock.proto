@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package gonetlock;
+option go_package = "github.com/gonetlock/gonetlock/gonetlockprotobuf";
+
+enum LockType {
+  WRITE = 0;
+  READ = 1;
+}
+
+enum LockMode {
+  BREAK = 0;
+  WAIT = 1;
+}
+
+enum LockConnectionDrop {
+  RELEASE = 0;
+  IGNORE = 1;
+}
+
+message LockRequest {
+  string client_id = 1;
+  string lock_name = 2;
+  LockType type = 3;
+  LockMode mode = 4;
+  uint32 wait_timeout = 5;
+  uint32 lock_timeout = 6;
+  LockConnectionDrop connection_drop = 7;
+}
+
+message LockRefreshRequest {
+  string client_id = 1;
+  string lock_name = 2;
+  LockMode mode = 3;
+  uint32 wait_timeout = 4;
+  uint32 lock_timeout = 5;
+  LockConnectionDrop connection_drop = 6;
+}
+
+message LockReleaseRequest {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockStatusRequest {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockDeniedResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockWaitResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockGrantedResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockWaitTimeoutResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockTimeoutResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockReleaseResponse {
+  string client_id = 1;
+  string lock_name = 2;
+}
+
+message LockStatusResponse {
+  string client_id = 1;
+  string lock_name = 2;
+  LockType type = 3;
+}
