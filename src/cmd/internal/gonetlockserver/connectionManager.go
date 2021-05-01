@@ -7,39 +7,58 @@ import (
 )
 
 type connectionManager struct {
-  connections map[string]*Connection
+  connections map[string]*connection
   lock        sync.Mutex
 }
 
-func NewConnectionManager() *connectionManager {
-  connectionManger := new(connectionManager)
-  connectionManger.connections = make(map[string]*Connection)
+var containerConnectionManagerLock = &sync.Mutex{}
+var containerConnectionManager *connectionManager
 
-  return connectionManger
+func getConnectionManager() *connectionManager {
+  if containerConnectionManager == nil {
+    // only lock on initialization
+    containerConnectionManagerLock.Lock()
+
+    // check again after lock
+    if containerConnectionManager == nil {
+      containerConnectionManager = new(connectionManager)
+      containerConnectionManager.connections = make(map[string]*connection)
+    }
+
+    containerConnectionManagerLock.Unlock()
+  }
+
+  return containerConnectionManager
 }
 
-func (connectionManager *connectionManager) NewConnection(netConnection *net.Conn) *Connection {
-  // Create Connection object
+func (connectionManager *connectionManager) newConnection(netConnection *net.Conn) *connection {
+  // Create connection object
   connection := newConnection(netConnection)
 
   connectionManager.lock.Lock()
-  // Check if this Connection already exists. Close and delete it if it does.
+  // Check if this connection already exists. close and delete it if it does.
   existingConnection := connectionManager.connections[connection.Id]
   if existingConnection != nil {
     connectionManager.closeAndRemoveConnection(existingConnection)
   }
 
-  // Add Connection to map
+  // Add connection to map
   connectionManager.connections[connection.Id] = connection
 
-  fmt.Println("New Connection: ", connection.Id)
+  // Create default client and add it to the connection
+  clientManager := getClientManager()
+  client := clientManager.newClient(connection.Id)
+  connection.setDefaultClient(client)
+  client.addConnection(connection)
+
+  fmt.Println("New connection: ", connection.Id)
 
   connectionManager.lock.Unlock()
 
   return connection
 }
 
-func (connectionManager *connectionManager) CloseAllConnections() {
+func (connectionManager *connectionManager) closeAllConnections() {
   connectionManager.lock.Lock()
 
   fmt.Println("Closing all connections")
@@ -51,25 +70,25 @@ func (connectionManager *connectionManager) CloseAllConnections() {
   connectionManager.lock.Unlock()
 }
 
-func (connectionManager *connectionManager) CloseConnection(connection *Connection) {
+func (connectionManager *connectionManager) closeConnection(connection *connection) {
   connectionManager.lock.Lock()
 
-  fmt.Println("Closing Connection: ", connection.Id)
+  fmt.Println("Closing connection: ", connection.Id)
   connectionManager.closeAndRemoveConnection(connection)
-  fmt.Println("Connection closed")
+  fmt.Println("connection closed")
 
   connectionManager.lock.Unlock()
 }
 
-func (connectionManager *connectionManager) closeAndRemoveConnection(connection *Connection) {
-  // close the tcp Connection
-  connection.Close()
+func (connectionManager *connectionManager) closeAndRemoveConnection(connection *connection) {
+  // close the tcp connection
+  connection.close()
 
-  // remove the Connection from all clients
+  // remove the connection from all clients
   for _, client := range connection.clients {
-    client.RemoveConnection(connection)
+    client.removeConnection(connection)
   }
 
-  // remove the Connection from our connections list
+  // remove the connection from our connections list
   delete(connectionManager.connections, connection.Id)
 }

@@ -5,7 +5,7 @@ import (
   "net"
 )
 
-type Connection struct {
+type connection struct {
   Connection    *gonetlocknet.Conn
   DefaultClient *client
   clients       map[string]*client
@@ -13,8 +13,8 @@ type Connection struct {
 }
 
 // to be used by connectionManager only
-func newConnection(netConnection *net.Conn) *Connection {
-  connection := new(Connection)
+func newConnection(netConnection *net.Conn) *connection {
+  connection := new(connection)
 
   connection.Connection = gonetlocknet.NewConn(*netConnection)
 
@@ -25,17 +25,39 @@ func newConnection(netConnection *net.Conn) *Connection {
 }
 
 // to be used by connectionManager only
-func (connection *Connection) Close() {
-  // close the Connection
+func (connection *connection) close() {
+  // close the connection
   _ = connection.Connection.Close()
 }
 
 // to be used by connectionManager only
-func (connection *Connection) AddClient(client *client) {
+func (connection *connection) addClient(client *client) {
+  if connection.hasClient(client) {
+    return
+  }
+
   connection.clients[client.Id] = client
 }
 
 // to be used by connectionManager only
-func (connection *Connection) RemoveClient(client *client) {
+func (connection *connection) removeClient(client *client) {
+  if !connection.hasClient(client) {
+    return
+  }
+
   delete(connection.clients, client.Id)
+}
+
+// to be used by connectionManager only
+func (connection *connection) hasClient(client *client) bool {
+  _, present := connection.clients[client.Id]
+
+  return present
+}
+
+// to be used by connectionManager only
+func (connection *connection) setDefaultClient(client *client) {
+  connection.DefaultClient = client
+
+  connection.addClient(client)
 }

@@ -2,15 +2,15 @@ package gonetlockserver
 
 import googleproto "google.golang.org/protobuf/proto"
 
-type Request struct {
-  Connection *Connection
+type request struct {
+  Connection *connection
   Key string
   MessageType string
   Message *googleproto.Message
 }
 
-func NewMessage (connection *Connection, key string, messageType string, any *googleproto.Message) *Request {
-  message := new(Request)
+func newMessage(connection *connection, key string, messageType string, any *googleproto.Message) *request {
+  message := new(request)
   message.Connection = connection
   message.Key = key
   message.MessageType = messageType
