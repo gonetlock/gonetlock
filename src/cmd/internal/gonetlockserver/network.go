@@ -1,16 +1,14 @@
 package gonetlockserver
 
 import (
-  "fmt"
+  "log"
   "net"
-  "os"
 )
 
 func Listen(host string, port string) {
   listener, err := net.Listen("tcp", host + ":" + port)
   if err != nil {
-    fmt.Println("Error listening:", err.Error())
-    os.Exit(1)
+    log.Fatal("Error listening:", err.Error())
   }
 
   defer func() {
@@ -21,17 +19,16 @@ func Listen(host string, port string) {
     getConnectionManager().closeAllConnections()
   }()
 
-  fmt.Println("Listening on " + host + ":" + port)
+  log.Println("Listening on " + host + ":" + port)
 
   for {
     // listen for an incoming connection
     connection, err := listener.Accept()
     if err != nil {
-      fmt.Println("Error accepting: ", err.Error())
-      os.Exit(1)
+      log.Println("Error accepting: ", err.Error())
+    } else {
+      // handle connections in a new goroutine.
+      go handleRequests(&connection)
     }
-
-    // handle connections in a new goroutine.
-    go handleRequest(&connection)
   }
 }

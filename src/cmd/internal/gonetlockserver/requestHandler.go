@@ -7,7 +7,7 @@ import (
   "time"
 )
 
-func handleRequest(netConnection *net.Conn) {
+func handleRequests(netConnection *net.Conn) {
   connectionManager := getConnectionManager()
   connection := connectionManager.newConnection(netConnection)
 
@@ -22,6 +22,7 @@ func handleRequest(netConnection *net.Conn) {
     if err != nil {
       if err.Error() == "EOF" {
         fmt.Println("connection error: ", connection.Id, " ", err.Error())
+
         return
       } else {
         fmt.Println("Error reading line: ", err.Error())
